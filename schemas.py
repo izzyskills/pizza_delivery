@@ -12,13 +12,16 @@ class SignupModel(BaseModel):
     class Config:
         orm_mode = True
         schema_extra = {
-
             "example": {
                 "username": "john doe",
                 "email": "johndoe@gmail.om",
                 "password": "password",
-                is_staff: False,
-                is_active: True}}
+                "is_staff": False,
+                "is_active": True
+                }
+            }
+
+
 class LoginModel(BaseModel):
     username: str
     password: str

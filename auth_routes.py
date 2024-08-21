@@ -1,7 +1,9 @@
 from fastapi import APIRouter, status
 from database import Session,engine
+from models import User
 from schemas import SignupModel,LoginModel
 from fastapi.exceptions import HTTPException
+from werkzeug.security import generate_password_hash,check_password_hash
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -16,19 +18,21 @@ async def hello():
     return {"message": "Hello World"}
 
 
-@auth_router.post("/signup")
+@auth_router.post("/signup",status_code=status.HTTP_201_CREATED)
 async def signup(user: SignupModel):
     db_email = session.query(User).filter(User.email == user.email).first()
     db_username = session.query(User).filter(User.username == user.username).first()
 
     if db_email is not None:
-        return HttpResponse(status_code=status.HTTP_400_BAD_REQUEST, detail="Usre with the Email already exists")
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with the email already exists"
+        )
     
     if db_username is not None:
-        return HttpResponse(status_code=status.HTTP_400_BAD_REQUEST, detail="Usre with the username already exists")
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usre with the username already exists")
 
-    new_user = User(username=user.username,email=user.email,password=user.password)
-    session.add(user)
+    new_user = User(username=user.username,email=user.email,hashed_password=generate_password_hash(user.password),is_active=user.is_active ,is_staff=user.is_staff )
+    session.add(new_user)
     session.commit()
-    return user
+    return new_user
     
