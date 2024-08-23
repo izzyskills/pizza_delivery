@@ -1,5 +1,4 @@
-# utils/auth.py or crud.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Union
 
 from fastapi import HTTPException, Request
@@ -9,28 +8,36 @@ from jose import JWTError, jwt
 from config import setting
 
 
-def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+def create_access_token(
+    subject: Union[str, Any], expires_delta: int | None = None
+) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
+        expiration_time = datetime.now(tz=timezone.utc) + timedelta(
+            minutes=expires_delta
+        )
     else:
-        expires_delta = datetime.utcnow() + timedelta(
+        expiration_time = datetime.now(tz=timezone.utc) + timedelta(
             minutes=setting.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    to_encode = {"exp": expiration_time, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, setting.secret_key, setting.algorithm)
     return encoded_jwt
 
 
-def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+def create_refresh_token(
+    subject: Union[str, Any], expires_delta: int | None = None
+) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
+        expiration_time = datetime.now(tz=timezone.utc) + timedelta(
+            minutes=expires_delta
+        )
     else:
-        expires_delta = datetime.utcnow() + timedelta(
+        expiration_time = datetime.now(tz=timezone.utc) + timedelta(
             minutes=setting.REFRESH_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    to_encode = {"exp": expiration_time, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, setting.refresh_secret_key, setting.algorithm)
     return encoded_jwt
 
@@ -67,13 +74,8 @@ class JWTBearer(HTTPBearer):
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
     def verify_jwt(self, jwtoken: str) -> bool:
-        try:
-            payload = decodeJWT(jwtoken)
-            return True
-        except jwt.ExpiredSignatureError:
-            return False
-        except jwt.JWTError:
-            return False
+        payload = decodeJWT(jwtoken)
+        return payload is not None
 
 
-# jwt_bearer = JWTBearer()
+jwt_bearer = JWTBearer()

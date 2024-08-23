@@ -16,15 +16,15 @@ class Settings(BaseSettings):
     secret_key: str
     refresh_secret_key: str
     algorithm: str
-    timeout: int
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    REFRESH_TOKEN_EXPIRE_MINUTES: int
+    token_timeout: int
+    access_token_expire_minutes: int
+    refresh_token_expire_minutes: int
 
     db_url: str
     # internal env
-    adminapikey: str
+    admin_api_key: str
 
-    SERVER: str
+    server: str
 
     class Config:
         env_file = Path(Path(__file__).resolve().parent) / ".env"
@@ -32,3 +32,4 @@ class Settings(BaseSettings):
 
 
 setting = Settings()
+settings = Settings()
