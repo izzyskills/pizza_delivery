@@ -1,28 +1,22 @@
 # import os
 # from dotenv import load_dotenv
-from pydantic import BaseModel, StrictStr
+from pydantic import BaseModel, Field
 from typing import Optional
 
 # load_dotenv()
 
 
-class Settings(BaseModel):
-    authjwt_secret_key: StrictStr = (
-        "111b19c1e7f168a2ba0216cab4f708262a325f8ff23f34fff209332f432e6113"
-    )
-
-
 class SignupModel(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = Field(default=None)
     username: str
     email: str
     password: str
-    is_staff: Optional[bool]
-    is_active: Optional[bool]
+    is_staff: Optional[bool] = Field(default=False)
+    is_active: Optional[bool] = Field(default=True)
 
     class Config:
-        orm_mode = True
-        schema_extra = {
+        from_attribute = True
+        json_schema_extra = {
             "example": {
                 "username": "john doe",
                 "email": "johndoe@gmail.om",
@@ -36,3 +30,9 @@ class SignupModel(BaseModel):
 class LoginModel(BaseModel):
     username: str
     password: str
+
+    class Config:
+        from_attribute = True
+        json_schema_extra = {
+            "example": {"username": "john doe", "password": "password"}
+        }

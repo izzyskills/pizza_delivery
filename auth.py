@@ -5,7 +5,7 @@ from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
-from config import setting
+from config import settings
 
 
 def create_access_token(
@@ -17,11 +17,11 @@ def create_access_token(
         )
     else:
         expiration_time = datetime.now(tz=timezone.utc) + timedelta(
-            minutes=setting.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=settings.access_token_expire_minutes
         )
 
     to_encode = {"exp": expiration_time, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, setting.secret_key, setting.algorithm)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, settings.algorithm)
     return encoded_jwt
 
 
@@ -34,17 +34,17 @@ def create_refresh_token(
         )
     else:
         expiration_time = datetime.now(tz=timezone.utc) + timedelta(
-            minutes=setting.REFRESH_TOKEN_EXPIRE_MINUTES
+            minutes=settings.refresh_token_expire_minutes
         )
 
     to_encode = {"exp": expiration_time, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, setting.refresh_secret_key, setting.algorithm)
+    encoded_jwt = jwt.encode(to_encode, settings.refresh_secret_key, settings.algorithm)
     return encoded_jwt
 
 
 def decodeJWT(jwtoken: str):
     try:
-        payload = jwt.decode(jwtoken, setting.secret_key, setting.algorithm)
+        payload = jwt.decode(jwtoken, settings.secret_key, settings.algorithm)
         return payload
     except JWTError as e:
         print(f"JWT decode error: {str(e)}")

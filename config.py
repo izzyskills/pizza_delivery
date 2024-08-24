@@ -1,4 +1,3 @@
-# config.py
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
@@ -10,7 +9,6 @@ class Settings(BaseSettings):
     db_name: str
     db_pwd: str
     db_usr: str
-    port: str
 
     # JWT Token Related
     secret_key: str
@@ -28,8 +26,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = Path(Path(__file__).resolve().parent) / ".env"
-        print(f"environment created - {Path(Path(__file__).resolve().name)}")
 
 
-setting = Settings()
 settings = Settings()
