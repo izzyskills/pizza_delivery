@@ -51,6 +51,15 @@ def decodeJWT(jwtoken: str):
         return None
 
 
+def decodeRefreshJWT(jwtoken: str):
+    try:
+        payload = jwt.decode(jwtoken, settings.refresh_secret_key, settings.algorithm)
+        return payload
+    except JWTError as e:
+        print(f"JWT decode error: {str(e)}")
+        return None
+
+
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
@@ -73,9 +82,13 @@ class JWTBearer(HTTPBearer):
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
-    def verify_jwt(self, jwtoken: str) -> bool:
+    def verify_jwt(self, jwtoken: str) -> dict[str, Any] | None:
         payload = decodeJWT(jwtoken)
-        return payload is not None
+        return payload
+
+    def verify_refresh_jwt(self, jwtoken: str) -> dict[str, Any] | None:
+        payload = decodeRefreshJWT(jwtoken)
+        return payload
 
 
 jwt_bearer = JWTBearer()

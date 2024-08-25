@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from database import Session, engine
 from models import User
 from schemas import LoginModel, SignupModel
-from auth import JWTBearer, create_access_token, create_refresh_token
+from auth import JWTBearer, create_access_token, create_refresh_token, jwt_bearer
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -75,3 +75,21 @@ async def login(user: LoginModel):
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Username Or Password"
     )
+
+
+@auth_router.post("/refresh", status_code=status.HTTP_200_OK)
+async def refresh(refresh_token: str):
+    """
+    ## Refresh a token
+    This requires
+        ```
+            refresh_token:str
+        ```
+    and returns a new access token
+    """
+    payload = jwt_bearer.verify_refresh_jwt(jwtoken=refresh_token)
+    if payload:
+        username = payload.get("sub")
+        access_token = create_access_token(subject=username)
+        return jsonable_encoder({"access": access_token})
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
