@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from database import Session, engine
 from models import User
 from schemas import LoginModel, SignupModel
-from auth import create_access_token, create_refresh_token
+from auth import JWTBearer, create_access_token, create_refresh_token
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -18,7 +18,7 @@ session = Session(bind=engine)
 
 
 @auth_router.get("/")
-async def hello():
+async def hello(token: str = Depends(JWTBearer())):
     return {"message": "Hello World"}
 
 
