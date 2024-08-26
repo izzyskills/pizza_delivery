@@ -36,3 +36,23 @@ class LoginModel(BaseModel):
         json_schema_extra = {
             "example": {"username": "john doe", "password": "password"}
         }
+
+
+class OrderModel(BaseModel):
+    id: Optional[int] = Field(default=None)
+    quantity: int
+    orderStatus: Optional[str] = Field(default="Pending")
+    pizza_size: Optional[str] = Field(default="Small")
+    user_id: Optional[int] = Field(default=None)
+
+    class Config:
+        orm_mode = True
+        from_attribute = True
+        schema_extra = {
+            "example": {
+                "quantity": 2,
+                "orderStatus": "Pending",
+                "pizza_size": "Small",
+                "user_id": 1,
+            }
+        }
