@@ -43,3 +43,40 @@ async def create_order(order: OrderModel, token: str = Depends(JWTBearer())):
         "id": new_order.id,
     }
     return jsonable_encoder(response)
+
+
+@order_router.get("/orders")
+async def list_all_orders(token: str = Depends(JWTBearer())):
+    db_user = session.query(User).filter(User.username == token).first()
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    if bool(db_user.is_staff):
+        orders = session.query(Order).all()
+        return jsonable_encoder(orders)
+    orders = session.query(Order).filter(Order.user_id == db_user.id).all()
+    return jsonable_encoder(orders)
+
+
+@order_router.get("/order/{order_id}")
+async def get_order(order_id: int, token: str = Depends(JWTBearer())):
+    db_user = session.query(User).filter(User.username == token).first()
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    order = session.query(Order).filter(Order.id == order_id).first()
+    if order is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
+        )
+    if order.user_id != db_user.id and not bool(db_user.is_staff):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to view this order",
+        )
+    return jsonable_encoder(order)
